@@ -29,7 +29,7 @@ assert min(P0FS, P0FSW, P0SS, P0SSW, P1FS, P1FSW, P1SS, P1SSW) >= 0 and max(P0FS
 
 def makePlayer(name = "player", first_legal = 0.9, first_win = 0.9, second_legal = 0.9, second_win = 0.9):
     """
-    Taking in the appropriate probablities this function returns a player dictionary 
+    Taking in the appropriate probablities this function returns a player dictionary with a blank scoreboard
     """
     return{"name": name ,
            "first_legal": first_legal,
@@ -52,8 +52,8 @@ def choose_server():
 
 def point_winner(server, playerZero, playerOne):
     """
-    Given a starting server, the probabilities of legal serves and the probability of winning their respective serve, 
-    the function returns the winner of a point according to the probabilities given.
+    Given a starting server, and two players the function returns the winner of the point.
+    It does this by comparing a random number between 0 and 1 to the servers probabilites of sucess
     """
     if server == 0:
         startingPlayer = playerZero
@@ -85,8 +85,7 @@ def point_winner(server, playerZero, playerOne):
 
 def play_game(playerZero, playerOne):
     """
-    Given a starting server, the probabilities of legal serves and the probability of winning their respective serve, return the 
-    winner of a game of tennis between player 0 and player 1 with the same player serving throughout.
+    Given two players this simulates a game of tennis and returns the winner.
     """
     server = choose_server()
     playerZero["rounds_won_per_game"][-1] = 0
@@ -108,8 +107,7 @@ def play_game(playerZero, playerOne):
 
 def play_set(playerZero, playerOne):
     """
-    Given a starting server, the probabilities of legal serves and the probability of winning their respective serve, returns 
-    the winner of the set of tennis between player 0 and player 1 where the starting server alternates between games.
+    Given 2 players, this function simulates a set of tennis and returns the winner of the set.
     """
     playerZero["games_won"][-1] += 1
     playerOne["games_won"][-1] += 1
@@ -131,11 +129,10 @@ def play_set(playerZero, playerOne):
 
 def play_match(playerZero, playerOne):
     """
-    Given a starting server, the probabilities of legal serves and the probability of winning their respective serve, returns 
-    the winner of a full match of tennis between player 0 and player 1 of the first to win 3 sets, with the server alternating 
-    between games.
+        Given 2 players, this function simulates a match of tennis and returns the winner of the match.
+
     """
-    playerZero["sets_won"][-1] = 0
+    playerZero["sets_won"][-1] = 0 
     playerOne["sets_won"][-1] = 0
     while playerZero["sets_won"] < 3 and playerOne["sets_won"] < 3:
         if play_set(playerZero, playerOne) == playerZero:
