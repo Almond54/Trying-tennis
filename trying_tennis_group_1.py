@@ -36,7 +36,7 @@ def makePlayer(name = "player", first_legal = 0.9, first_win = 0.9, second_legal
            "first_win": first_win, 
            "second_legal": second_legal, 
            "second_win": second_win, 
-           "rounds_won_per_game": [0], 
+           "rounds_won_per_game": [], 
            "games_won": [0], 
            "sets_won": [0]
            }
@@ -52,8 +52,7 @@ def choose_server():
 
 def point_winner(server, playerZero, playerOne):
     """
-    Given a starting server, and two players the function returns the winner of the point.
-    It does this by comparing a random number between 0 and 1 to the servers probabilites of sucess
+    Given 2 player dictionaries and a server it simulates a round of tennis and returns the winner
     """
     if server == 0:
         startingPlayer = playerZero
@@ -61,42 +60,42 @@ def point_winner(server, playerZero, playerOne):
     else:
         startingPlayer = playerOne
         otherPlayer = playerZero
-    print(f"The server is {startingPlayer}")
+    print(f"The server is {startingPlayer['name']}")
     if random.random() <= startingPlayer["first_legal"]:
-        print("The server first serve is legal")
+        print(f"{startingPlayer['name']}'s first serve is legal")
         if random.random() <= startingPlayer["first_win"]:
-            print("the server won on the first serve")
+            print(f"{startingPlayer['name']} won this point on the first serve")
             return startingPlayer
-        print("the server lost on the first serve")
+        print(f"{otherPlayer['name']} won this point on the second serve")
     else:
-        print("The server first serve is not legal")
+        print(f"{startingPlayer['name']}'s first serve is not legal")
         if random.random() <= startingPlayer["second_legal"]:
-            print("The server's second serve is legal")
+            print(f"{startingPlayer['name']}'s second serve is legal")
             if random.random() <= startingPlayer["second_win"]:
-                print("the server won on the second serve")
+                print(f"{startingPlayer['name']} won on the second serve")
                 
                 return startingPlayer
-            print("the server lost the second serve")
+            print(f"{otherPlayer['name']} won after the second serve")
     return otherPlayer
 
 #its giving a random server every time they play a point so we need to get it to give a server then play the whole game with the 
 # same server, which we can do by getting another function to give a server at the start, but idk if theres a better way to do it
 
 
-def play_game(playerZero, playerOne):
+def play_game(playerZero, playerOne , server = choose_server()):
     """
     Given two players this simulates a game of tennis and returns the winner.
     """
-    server = choose_server()
-    playerZero["rounds_won_per_game"][-1] = 0
-    playerOne["rounds_won_per_game"][-1] = 0
-    rounds = 0
-    while abs(playerZero["rounds_won_per_game"][-1] - playerOne["rounds_won_per_game"][-1]) < 2 or rounds <= 4:
+    
+    playerZero["rounds_won_per_game"].append(0)
+    playerOne["rounds_won_per_game"].append(0)
+
+    #I have changed the while statement to be more readble the logic is now in its own function
+    while game_ongoing(playerZero["rounds_won_per_game"][-1], playerOne["rounds_won_per_game"][-1]):
         if point_winner(server, playerZero, playerOne) == playerZero:
             playerZero["rounds_won_per_game"][-1] += 1
         else:
             playerOne["rounds_won_per_game"][-1] += 1
-        rounds += 1
     if playerZero["rounds_won_per_game"][-1] > playerOne["rounds_won_per_game"][-1]:
         game_winner = playerZero
         playerZero["games_won"][-1] += 1
@@ -105,20 +104,23 @@ def play_game(playerZero, playerOne):
         playerOne["games_won"][-1] += 1
     return game_winner
 
+def game_ongoing(p0PointsWon, p1PointsWon):
+    """
+    This functions takes the parameters required to check if a game of tennis is ongoing and then returns true of false if it is ongoing
+    """
+    if p0PointsWon >= 4 or p1PointsWon >= 4: #Do any players have 4 or greater points?
+        if abs(p0PointsWon - p1PointsWon) >= 2: #Is the difference between their points 2 or more
+            return False
+    return True
+
 def play_set(playerZero, playerOne):
     """
     Given 2 players, this function simulates a set of tennis and returns the winner of the set.
     """
-    playerZero["games_won"][-1] += 1
-    playerOne["games_won"][-1] += 1
-    games = 0
-    while abs(playerZero["rounds_won_per_game"][-1] - playerOne["rounds_won_per_game"][-1]) < 2 or games <= 6:
-        if play_game(playerZero, playerOne) == playerZero:
-            playerZero["games_won"][-1] += 1
-        else:
-            playerOne["games_won"][-1] += 1
+    server = choose_server
+    while set_ongoing(playerZero["games_won"], playerOne["games_won"]):
+        play_game(playerZero, playerOne, server) == playerZero
         start_server = (start_server + 1) % 2
-        games += 1
     if playerZero["games_won"][-1] > playerOne["games_won"][-1]:
         set_winner = playerZero
         playerZero["sets_won"][-1] += 1
@@ -127,9 +129,18 @@ def play_set(playerZero, playerOne):
         playerOne["sets_won"][-1] += 1
     return set_winner
 
+def set_ongoing(p0GamesWon, p1GamesWon):
+    """
+    This function takes the parameters required to check if a set of tennis is ongoing and then returns true or false
+    """
+    if p0GamesWon > 6 or p1GamesWon >6:
+        if abs(p0GamesWon - p1GamesWon) >= 2:
+            return False
+    return True
+
 def play_match(playerZero, playerOne):
     """
-        Given 2 players, this function simulates a match of tennis and returns the winner of the match.
+    Given 2 players, this function simulates a match of tennis and returns the winner of the match.
 
     """
     playerZero["sets_won"][-1] = 0 
@@ -144,7 +155,7 @@ def play_match(playerZero, playerOne):
     else:
         match_winner = playerOne
     return match_winner
-
-print(play_game(DefaultPlayer1, DefaultPlayer2))
+for x in range(5):
+    print(play_game(DefaultPlayer1, DefaultPlayer2))
 #print(play_set(DefaultPlayer1, DefaultPlayer2))
 #print(play_match(DefaultPlayer1, DefaultPlayer2))
