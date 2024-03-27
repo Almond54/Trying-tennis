@@ -41,10 +41,34 @@ def makePlayer(name = "player", first_legal = 0.9, first_win = 0.9, second_legal
            "sets_won": [0]
            }
 
+class player():
+    def __init__(self, name = "player", first_legal = 0.9, first_win = 0.9, second_legal = 0.9, second_win = 0.9):
+        self.name = name
+        self.first_legal = first_legal
+        self.first_win = first_win
+        self.second_legal = second_legal
+        self.second_win = second_win
+        self.scoreboard = []
+    def calculate_points(self):
+        pass
+    
+
+
+def makeGame(playerZero, playerOne):
+    temp = {
+        "players": (playerZero, playerOne),
+        "startServer": 
+    }
+    return temp
+
+def makeSet(playerZero, playerOne):
+
+
+def makeSet(playerZero, playerOne)
 DefaultPlayer1 = makePlayer("Jim" ,0.76, 0.74, 0.94, 0.41)
 DefaultPlayer2 = makePlayer("Bob", 0.7, 0.71, 0.92, 0.6)
 
-def choose_server():
+def choose_server(playerZero, playerOne):
     """
     Returns a random integer 0 or 1 corresponding to a player number.
     """
