@@ -37,7 +37,7 @@ def makePlayer(name = "player", first_legal = 0.9, first_win = 0.9, second_legal
            "second_legal": second_legal, 
            "second_win": second_win, 
            "rounds_won_per_game": [], 
-           "games_won": [0], 
+           "games_won_per_set": [], 
            "sets_won": [0]
            }
 
@@ -98,10 +98,10 @@ def play_game(playerZero, playerOne , server = choose_server()):
             playerOne["rounds_won_per_game"][-1] += 1
     if playerZero["rounds_won_per_game"][-1] > playerOne["rounds_won_per_game"][-1]:
         game_winner = playerZero
-        playerZero["games_won"][-1] += 1
+        playerZero["games_won_per_set"][-1] += 1
     else:
         game_winner = playerOne
-        playerOne["games_won"][-1] += 1
+        playerOne["games_won_per_set"][-1] += 1
     return game_winner
 
 def game_ongoing(p0PointsWon, p1PointsWon):
@@ -117,11 +117,13 @@ def play_set(playerZero, playerOne):
     """
     Given 2 players, this function simulates a set of tennis and returns the winner of the set.
     """
-    server = choose_server
-    while set_ongoing(playerZero["games_won"], playerOne["games_won"]):
+    playerZero["games_won_per_set"].append(0)
+    playerOne["games_won_per_set"].append(0)
+    server = choose_server()
+    while set_ongoing(playerZero["games_won_per_set"][-1], playerOne["games_won_per_set"][-1]):
         play_game(playerZero, playerOne, server) == playerZero
-        start_server = (start_server + 1) % 2
-    if playerZero["games_won"][-1] > playerOne["games_won"][-1]:
+        server = (server + 1) % 2
+    if playerZero["games_won_per_set"][-1] > playerOne["games_won_per_set"][-1]:
         set_winner = playerZero
         playerZero["sets_won"][-1] += 1
     else:
@@ -155,7 +157,7 @@ def play_match(playerZero, playerOne):
     else:
         match_winner = playerOne
     return match_winner
-for x in range(5):
-    print(play_game(DefaultPlayer1, DefaultPlayer2))
-#print(play_set(DefaultPlayer1, DefaultPlayer2))
+#for x in range(5):
+#    print(play_game(DefaultPlayer1, DefaultPlayer2))
+print(play_set(DefaultPlayer1, DefaultPlayer2))
 #print(play_match(DefaultPlayer1, DefaultPlayer2))
