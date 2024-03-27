@@ -42,29 +42,69 @@ def makePlayer(name = "player", first_legal = 0.9, first_win = 0.9, second_legal
            }
 
 class player():
+    """
+    A tennis player object that store their:
+        >Name
+        >Probabilites of winning on serves
+        >A scoreboard
+    and provides fuctions to calcuate the number of rounds, games and sets won respectivly
+    """
     def __init__(self, name = "player", first_legal = 0.9, first_win = 0.9, second_legal = 0.9, second_win = 0.9):
+        """
+        This function is the initializion for a new player.
+        """
         self.name = name
         self.first_legal = first_legal
         self.first_win = first_win
         self.second_legal = second_legal
         self.second_win = second_win
         self.scoreboard = []
-    def calculate_points(self):
+    def rounds_won(self, game):
+        """
+        By passing in a game object this function will return the amount of rounds won
+        """
+        pass
+    def games_won(self, set):
+        pass
+    def sets_won(self, match):
         pass
     
 
+class game():
+    """
+    An object for storing all the details of a game tennis including:
+        >The players names
+        >Who won each round
+    and a function to determin the game winner
+    """
+    def __init__(self, playerZero, playerOne):
+        self.players = (playerZero, playerOne)
+        self.roundRecord = []
+    
+    def calcuateWinner(self):
+        """
+        This function calcuates if the game is ongoing or if there is a winner
+        """
+        pass
 
-def makeGame(playerZero, playerOne):
-    temp = {
-        "players": (playerZero, playerOne),
-        "startServer": 
-    }
-    return temp
+class tennisSet():
+    """
+    This object simulates a set of  tennis holding all the games that occured in the set and being able to dertermin the winner of the set
+    """
+    def __init__(self, playerZero, playerOne):
+        self.players = (playerZero, playerOne)
+        self.gameRecord = []
+    
+    def playSet(self):
+        pass
 
-def makeSet(playerZero, playerOne):
+    def calcuateWinner(self):
+        """
+        This function calcuates if the set is ongoing or if there is a winner
+        """
+        pass
 
 
-def makeSet(playerZero, playerOne)
 DefaultPlayer1 = makePlayer("Jim" ,0.76, 0.74, 0.94, 0.41)
 DefaultPlayer2 = makePlayer("Bob", 0.7, 0.71, 0.92, 0.6)
 
@@ -76,7 +116,7 @@ def choose_server(playerZero, playerOne):
 
 def point_winner(server, playerZero, playerOne):
     """
-    Given 2 player dictionaries and a server it simulates a round of tennis and returns the winner
+    Given 2 player objects and a server it simulates a round of tennis and returns the winner
     """
     if server == 0:
         startingPlayer = playerZero
