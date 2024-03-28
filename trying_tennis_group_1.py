@@ -73,7 +73,6 @@ def point_winner(server, playerZero, playerOne):
             print(f"{startingPlayer['name']}'s second serve is legal")
             if random.random() <= startingPlayer["second_win"]:
                 print(f"{startingPlayer['name']} won on the second serve")
-                
                 return startingPlayer
             print(f"{otherPlayer['name']} won after the second serve")
     return otherPlayer
@@ -126,7 +125,7 @@ def play_set(playerZero, playerOne, starting_server = choose_server()):
         playerZero["games_won_per_set"].append(0)
         playerOne["games_won_per_set"].append(0)
     while set_ongoing(playerZero["games_won_per_set"][-1], playerOne["games_won_per_set"][-1]):
-        play_game(playerZero, playerOne, server) == playerZero
+        play_game(playerZero, playerOne, server)
         server = (server + 1) % 2
     if playerZero["games_won_per_set"][-1] > playerOne["games_won_per_set"][-1]:
         set_winner = playerZero
@@ -139,15 +138,11 @@ def play_set(playerZero, playerOne, starting_server = choose_server()):
 def play_match(playerZero, playerOne, starting_server = choose_server()):
     """
     Given 2 players, this function simulates a match of tennis and returns the winner of the match.
-
     """
     playerZero["sets_won"][-1] = 0 
     playerOne["sets_won"][-1] = 0
-    while playerZero["sets_won"] < 3 and playerOne["sets_won"] < 3:
-        if play_set(playerZero, playerOne, server) == playerZero:
-            playerZero["sets_won"][-1] += 1
-        else:
-            playerOne["sets_won"][-1] += 1
+    while playerZero["sets_won"][-1] < 3 and playerOne["sets_won"][-1] < 3:
+        play_set(playerZero, playerOne, server)
     if playerZero["sets_won"][-1] > playerOne["sets_won"][-1]:
         match_winner = playerZero
     else:
