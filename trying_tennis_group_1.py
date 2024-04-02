@@ -36,13 +36,17 @@ def makePlayer(name = "player", first_legal = 0.9, first_win = 0.9, second_legal
            "first_win": first_win, 
            "second_legal": second_legal, 
            "second_win": second_win, 
-           "rounds_won_per_game": [], 
+           "points_won_per_game": [], 
            "games_won_per_set": [0], 
-           "sets_won": [0]
+           "sets_won": [0],
+           "first_serves": 0,
+           "second_serves": 0,
+           "points_won_on_first_serve": 0,
+           "points_won_on_second_serve": 0
            }
 
-DefaultPlayer1 = makePlayer("Jim" ,0.76, 0.74, 0.94, 0.41)
-DefaultPlayer2 = makePlayer("Bob", 0.7, 0.71, 0.92, 0.6)
+DefaultPlayer0 = makePlayer("Jim" ,0.76, 0.74, 0.94, 0.41)
+DefaultPlayer1 = makePlayer("Bob", 0.7, 0.71, 0.92, 0.6)
 
 def choose_server():
     """
@@ -50,7 +54,7 @@ def choose_server():
     """
     return random.randint(0, 1)
 
-def point_winner(server, playerZero, playerOne):
+def point_winner(playerZero, playerOne, server = choose_server()):
     """
     Given 2 player dictionaries and a server it simulates a round of tennis and returns the winner
     """
@@ -60,19 +64,23 @@ def point_winner(server, playerZero, playerOne):
     else:
         startingPlayer = playerOne
         otherPlayer = playerZero
+    startingPlayer['first_serves'] += 1
     print(f"The server is {startingPlayer['name']}")
     if random.random() <= startingPlayer["first_legal"]:
         print(f"{startingPlayer['name']}'s first serve is legal")
         if random.random() <= startingPlayer["first_win"]:
+            startingPlayer['points_won_on_first_serve'] += 1
             print(f"{startingPlayer['name']} won this point on the first serve")
             return startingPlayer
         print(f"{otherPlayer['name']} won this point on the second serve")
     else:
         print(f"{startingPlayer['name']}'s first serve is not legal")
+        startingPlayer['second_serves'] += 1
         if random.random() <= startingPlayer["second_legal"]:
             print(f"{startingPlayer['name']}'s second serve is legal")
             if random.random() <= startingPlayer["second_win"]:
                 print(f"{startingPlayer['name']} won on the second serve")
+                startingPlayer['points_won_on_second_serve'] += 1
                 return startingPlayer
             print(f"{otherPlayer['name']} won after the second serve")
     return otherPlayer
@@ -90,17 +98,14 @@ def play_game(playerZero, playerOne , server = choose_server()):
     """
     Given two players this simulates a game of tennis and returns the winner.
     """
-    
-    playerZero["rounds_won_per_game"].append(0)
-    playerOne["rounds_won_per_game"].append(0)
-
-    #I have changed the while statement to be more readble the logic is now in its own function
-    while game_ongoing(playerZero["rounds_won_per_game"][-1], playerOne["rounds_won_per_game"][-1]):
-        if point_winner(server, playerZero, playerOne) == playerZero:
-            playerZero["rounds_won_per_game"][-1] += 1
+    playerZero["points_won_per_game"].append(0)
+    playerOne["points_won_per_game"].append(0)
+    while game_ongoing(playerZero["points_won_per_game"][-1], playerOne["points_won_per_game"][-1]):
+        if point_winner(playerZero, playerOne, server) == playerZero:
+            playerZero["points_won_per_game"][-1] += 1
         else:
-            playerOne["rounds_won_per_game"][-1] += 1
-    if playerZero["rounds_won_per_game"][-1] > playerOne["rounds_won_per_game"][-1]:
+            playerOne["points_won_per_game"][-1] += 1
+    if playerZero["points_won_per_game"][-1] > playerOne["points_won_per_game"][-1]:
         game_winner = playerZero
         playerZero["games_won_per_set"][-1] += 1
     else:
@@ -125,8 +130,8 @@ def play_set(playerZero, playerOne, starting_server = choose_server()):
         playerZero["games_won_per_set"].append(0)
         playerOne["games_won_per_set"].append(0)
     while set_ongoing(playerZero["games_won_per_set"][-1], playerOne["games_won_per_set"][-1]):
-        play_game(playerZero, playerOne, server)
-        server = (server + 1) % 2
+        play_game(playerZero, playerOne, starting_server)
+        starting_server = (starting_server + 1) % 2
     if playerZero["games_won_per_set"][-1] > playerOne["games_won_per_set"][-1]:
         set_winner = playerZero
         playerZero["sets_won"][-1] += 1
@@ -142,14 +147,19 @@ def play_match(playerZero, playerOne, starting_server = choose_server()):
     playerZero["sets_won"][-1] = 0 
     playerOne["sets_won"][-1] = 0
     while playerZero["sets_won"][-1] < 3 and playerOne["sets_won"][-1] < 3:
-        play_set(playerZero, playerOne, server)
+        play_set(playerZero, playerOne, starting_server)
     if playerZero["sets_won"][-1] > playerOne["sets_won"][-1]:
         match_winner = playerZero
     else:
         match_winner = playerOne
+    print(f"{match_winner['name']} won the match, winning {sum(match_winner['points_won_per_game'])} points total.")
+    for i in range(len(match_winner['games_won_per_set'])):
+        print(f"The match winner won {match_winner['games_won_per_set'][i]} games in set {i + 1}")
+    print(f"The match winner's percentage of points won on their first serve is {match_winner['points_won_on_first_serve'] / match_winner['first_serves']}")
+    print(f"The match winner's percentage of points won on their second serve is {match_winner['points_won_on_second_serve'] / match_winner['second_serves']}")
     return match_winner
 
-#for x in range(5):
-#    print(play_game(DefaultPlayer1, DefaultPlayer2))
-#print(play_set(DefaultPlayer1, DefaultPlayer2))
-#print(play_match(DefaultPlayer1, DefaultPlayer2))
+#print(point_winner(DefaultPlayer0, DefaultPlayer1))
+#print(play_game(DefaultPlayer0, DefaultPlayer1))
+#print(play_set(DefaultPlayer0, DefaultPlayer1))
+#print(play_match(DefaultPlayer0, DefaultPlayer1))
