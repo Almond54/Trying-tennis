@@ -150,14 +150,16 @@ def play_match(playerZero, playerOne, starting_server = choose_server()):
         play_set(playerZero, playerOne, starting_server)
     if playerZero["sets_won"][-1] > playerOne["sets_won"][-1]:
         match_winner = playerZero
+        match_loser = playerOne
     else:
         match_winner = playerOne
+        match_loser = playerZero
     print(f"{match_winner['name']} won the match, winning {sum(match_winner['points_won_per_game'])} points total.")
     for i in range(len(match_winner['games_won_per_set'])):
         print(f"The match winner won {match_winner['games_won_per_set'][i]} games in set {i + 1}")
     print(f"The match winner's percentage of points won on their first serve is {match_winner['points_won_on_first_serve'] / match_winner['first_serves']}")
     print(f"The match winner's percentage of points won on their second serve is {match_winner['points_won_on_second_serve'] / match_winner['second_serves']}")
-    return match_winner
+    return match_winner, match_loser
 
 def read_players(file):
     """
@@ -167,7 +169,7 @@ def read_players(file):
     with open(file, "r") as f:
         for line in f:
             stats = line.split(" ")
-            players.append(makePlayer(stats[0], stats[1], stats[2], stats[3], stats[4]))
+            players.append(makePlayer(stats[0], float(stats[1]), float(stats[2]), float(stats[3]), float(stats[4])))
     
     return players
 
@@ -183,18 +185,40 @@ def create_players(num):
 
 class tourney():
     """
-    This class manages a tourney of tennis players
+    This class manages a tourney of tennis players of single elimination style
     """
     def __init__(self, players):
+        while ((len(players) & (len(players)-1) == 0) and len(players) != 0) != True: #using bit manipulations to check if we have a power of 2 for the number of players
+            del players[-1] #delete the last players in the list until the number of players is a power of 2
         self.players = players
         self.players_remaining = players
         self.players_eliminated = []
     def create_pairings(self):
-        pass
+        self.players_remaining = random.shuffle(self.players_remaining)
+    def play_round(self):
+        nextRound = []
+        for x in range(0, len(self.players_remaining) - 2, 2):
+            resultsOfGame = play_match(self.players_remaining[x], self.players_remaining[x + 1])
+            winner = resultsOfGame[0]
+            loser = resultsOfGame[1]
+            nextRound.append(winner)
+            self.players_eliminated.append(loser)
+        self.players_remaining = nextRound
+        print(self.players_remaining)
+    def play(self):
+        while len(self.players) != 1:
+            self.play_round()
 
 #print(point_winner(DefaultPlayer0, DefaultPlayer1))
 #print(play_game(DefaultPlayer0, DefaultPlayer1))
 #print(play_set(DefaultPlayer0, DefaultPlayer1))
-#print(play_match(DefaultPlayer0, DefaultPlayer1))
-#create_players(10)
-print(read_players("players.txt"))
+#print(play_match(DefaultPlayer0, DefaultPlayer1)[0])
+#create_players(18)
+test = tourney(read_players("players.txt"))
+print(test.play_round())
+print(test.play_round())
+print(test.play_round())
+print(test.play_round())
+
+print(test.players_remaining)
+            
