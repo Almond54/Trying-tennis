@@ -1,5 +1,5 @@
 import random
-
+import randomname
 
 P0FS  = 0.76
 P0FSW = 0.74
@@ -159,7 +159,42 @@ def play_match(playerZero, playerOne, starting_server = choose_server()):
     print(f"The match winner's percentage of points won on their second serve is {match_winner['points_won_on_second_serve'] / match_winner['second_serves']}")
     return match_winner
 
+def read_players(file):
+    """
+    This function will extract the player dictionaries from a text file returning a list of all the player dictionaries
+    """
+    players = []
+    with open(file, "r") as f:
+        for line in f:
+            stats = line.split(" ")
+            players.append(makePlayer(stats[0], stats[1], stats[2], stats[3], stats[4]))
+    
+    return players
+
+def create_players(num):
+    """
+    This function writes players to a text file called players.txt
+    """
+    with open("players.txt", "w") as f:
+        for x in range(num):
+            name = randomname.get_name()
+            stats = [random.random() for x in range(4)]
+            f.write(f"{name} {stats[0]} {stats[1]} {stats[2]} {stats[3]}\n")
+
+class tourney():
+    """
+    This class manages a tourney of tennis players
+    """
+    def __init__(self, players):
+        self.players = players
+        self.players_remaining = players
+        self.players_eliminated = []
+    def create_pairings(self):
+        pass
+
 #print(point_winner(DefaultPlayer0, DefaultPlayer1))
 #print(play_game(DefaultPlayer0, DefaultPlayer1))
 #print(play_set(DefaultPlayer0, DefaultPlayer1))
 #print(play_match(DefaultPlayer0, DefaultPlayer1))
+#create_players(10)
+print(read_players("players.txt"))
