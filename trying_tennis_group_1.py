@@ -3,12 +3,14 @@ import randomname
 
 
 class Tennis():
+
     """
     This class represents a basic object of tennis (either a round, game, set, match, or tourney) as each of these subtypes of scoring has:
         > Players
         > A record of what has happened at that scope
         > A winner
     """
+
     def __init__(self, players, tracked = True):
         self.players = players
         self.record = []
@@ -155,6 +157,7 @@ class Game(Tennis):
         > A record of what happened during the game
         > The winner of the game
     """
+    
     def __init__(self, players, server, tracked = True):
         super().__init__(players, tracked)
         self.server = server
@@ -281,7 +284,7 @@ DefaultPlayer2 = Player("Bob", 0.7, 0.71, 0.92, 0.6)
 
 def choose_server(playerZero, playerOne):
     """
-    Returns a random integer 0 or 1 corresponding to a player number.
+    Returns random player.
     """
     return random.choice([playerZero, playerOne])
 
