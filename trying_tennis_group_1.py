@@ -1,165 +1,292 @@
 import random
 import randomname
 
-P0FS  = 0.76
-P0FSW = 0.74
-P0SS  = 0.94
-P0SSW = 0.41
-P1FS  = 0.70
-P1FSW = 0.71
-P1SS  = 0.92
-P1SSW = 0.60
 
-s = input("Use default input parameters? (yes/no) >> ")
-if s.lower() != "yes" and s.lower() != "y":
-    print("Please input the following information for Player 0, then Player 1:")
-    print("-Probability of a legal first serve")
-    print("-Probability of winning the point on the first serve")
-    print("-Probability of a legal second serve")
-    print("-Probability of winning the point on the second serve")
-    P0FS  = float(input("Player 0 first serve            >> "))
-    P0FSW = float(input("Player 0 wins with first serve  >> "))
-    P0SS  = float(input("Player 0 second serve           >> "))
-    P0SSW = float(input("Player 0 wins with second serve >> "))
-    P1FS  = float(input("Player 1 first serve            >> "))
-    P1FSW = float(input("Player 1 wins with first serve  >> "))
-    P1SS  = float(input("Player 1 second serve           >> "))
-    P1SSW = float(input("Player 1 wins with second serve >> "))
-assert min(P0FS, P0FSW, P0SS, P0SSW, P1FS, P1FSW, P1SS, P1SSW) >= 0 and max(P0FS, P0FSW, P0SS, P0SSW, P1FS, P1FSW, P1SS, P1SSW) <= 1, "Error: All probabilites must be between 0 and 1"
+class Tennis():
 
-def makePlayer(name = "player", first_legal = 0.9, first_win = 0.9, second_legal = 0.9, second_win = 0.9):
     """
-    Taking in the appropriate probablities this function returns a player dictionary with a blank scoreboard
+    This class represents a basic object of tennis (either a round, game, set, match, or tourney) as each of these subtypes of scoring has:
+        > Players
+        > A record of what has happened at that scope
+        > A winner
     """
-    return{"name": name ,
-           "first_legal": first_legal,
-           "first_win": first_win, 
-           "second_legal": second_legal, 
-           "second_win": second_win, 
-           "points_won_per_game": [], 
-           "games_won_per_set": [0], 
-           "sets_won": [0],
-           "first_serves": 0,
-           "second_serves": 0,
-           "points_won_on_first_serve": 0,
-           "points_won_on_second_serve": 0
-           }
 
-DefaultPlayer0 = makePlayer("Jim" ,0.76, 0.74, 0.94, 0.41)
-DefaultPlayer1 = makePlayer("Bob", 0.7, 0.71, 0.92, 0.6)
+    def __init__(self, players, tracked = True):
+        self.players = players
+        self.record = []
+        self.winner = "Undecided"
+        if tracked == True:
+            self.players[0].scoreboard.append(self)
+            self.players[1].scoreboard.append(self)
 
-def choose_server():
+class Player():
     """
-    Returns a random integer 0 or 1 corresponding to a player number.
+    A tennis player object that store their:
+        >Name
+        >Probabilites of winning on serves
+        >A scoreboard
+    and provides fuctions to calcuate the number of rounds, games and sets won respectivly
     """
-    return random.randint(0, 1)
+    def __init__(self, name = "player", first_legal = 0.9, first_win = 0.9, second_legal = 0.9, second_win = 0.9):
+        """
+        This function is the initializion for a new player.
+        """
+        self.name = name
+        self.first_legal = first_legal
+        self.first_win = first_win
+        self.second_legal = second_legal
+        self.second_win = second_win
+        self.scoreboard = []
+    def rounds_won_in_match(self, matchNum):
+        """
+        By passing in a match object this function will return the amount of rounds won
+        """
+        matchList = [i for i in self.scoreboard if type(i) == TennisMatch] # This is a list of all matches in the scoreboard
+        num = 0
+        assert len(matchList) >= matchNum, "Invalid match number! or no matches on this player"
 
-def point_winner(playerZero, playerOne, server = choose_server()):
-    """
-    Given 2 player dictionaries and a server it simulates a round of tennis and returns the winner
-    """
-    if server == 0:
-        startingPlayer = playerZero
-        otherPlayer = playerOne
-    else:
-        startingPlayer = playerOne
-        otherPlayer = playerZero
-    startingPlayer['first_serves'] += 1
-    print(f"The server is {startingPlayer['name']}")
-    if random.random() <= startingPlayer["first_legal"]:
-        print(f"{startingPlayer['name']}'s first serve is legal")
-        if random.random() <= startingPlayer["first_win"]:
-            startingPlayer['points_won_on_first_serve'] += 1
-            print(f"{startingPlayer['name']} won this point on the first serve")
-            return startingPlayer
-        print(f"{otherPlayer['name']} won this point on the second serve")
-    else:
-        print(f"{startingPlayer['name']}'s first serve is not legal")
-        startingPlayer['second_serves'] += 1
-        if random.random() <= startingPlayer["second_legal"]:
-            print(f"{startingPlayer['name']}'s second serve is legal")
-            if random.random() <= startingPlayer["second_win"]:
-                print(f"{startingPlayer['name']} won on the second serve")
-                startingPlayer['points_won_on_second_serve'] += 1
-                return startingPlayer
-            print(f"{otherPlayer['name']} won after the second serve")
-    return otherPlayer
+        # The following lines iterate through every round in the tennis match
+        for set in matchList[matchNum].record:
+            for game in set.record:
+                for round in game.record:
+                    if round.winner == self.name:
+                        num += 1
+        return num
+
+
+            
+    def service_games_won(self, matchNum):
+        """
+        This function returns the number of service games won in a match
+        """
+        matchList = [i for i in self.scoreboard if type(i) == TennisMatch] # This is a list of all matches in the scoreboard
+        num = 0
+        assert len(matchList) >= matchNum, "Invalid match number! or no matches on this player"
+        for set in matchList[matchNum].record:
+            for game in set.record:
+                if game.winner == self.name and game.server.name == self.name:
+                    num += 1
+        return num
+
+    def percentageOfPoints(self, matchNum):
+        """
+        This function returns a tuple of the the percentages of where each point was scored
+        """
+        matchList = [i for i in self.scoreboard if type(i) == TennisMatch] # This is a list of all matches in the scoreboard
+        FirstServeNum = 0
+        SecondServeNum = 0
+        roundsWon = self.rounds_won_in_match(matchNum)
+        assert len(matchList) >= matchNum, "Invalid match number! or there are no matches on this player"
+        for set in matchList[matchNum].record:
+            for game in set.record:
+                if game.winner == self.name and game.server.name == self.name:
+                    for round in game.record:
+                        if round.record == 1:
+                            FirstServeNum += 1
+                        else:
+                            SecondServeNum += 1
+        return ((FirstServeNum/roundsWon) * 100, (SecondServeNum/roundsWon) * 100, ((roundsWon - (FirstServeNum + SecondServeNum))/roundsWon) * 100)
+
     
-def game_ongoing(p0PointsWon, p1PointsWon):
+class RoundOfTennis(Tennis):
     """
-    This functions takes the parameters required to check if a game of tennis is ongoing and then returns true of false if it is ongoing
+    This class represents a singular round of tennis including:
+        > The Names of the players involved
+        > A record of what happened during the round
+        > The winner of the round
     """
-    if p0PointsWon >= 4 or p1PointsWon >= 4: #Do any players have 4 or greater points?
-        if abs(p0PointsWon - p1PointsWon) >= 2: #Is the difference between their points 2 or more
-            return False
-    return True
+
+    def __init__(self, players,server , tracked = True):
+        super().__init__(players, tracked)
+        self.server = server
+        self.record = 0
     
-def play_game(playerZero, playerOne , server = choose_server()):
+    def play(self):
+        """
+        This function plays the set of tennis changing the record as appropiate
+        """
+        if self.winner == "Undecided": #This is so you can't play a round thats already decided!
+            if self.server == self.players[0]:
+                otherplayer = self.players[1]
+
+            else:
+                otherplayer = self.players[0]
+
+            if random.random() <= self.server.first_legal:
+                if random.random() <= self.server.first_win:
+                    self.record = 1 # We will read the results depending on record number
+                    self.winner = self.server.name
+                else:
+                    self.record = 2
+                    self.winner = otherplayer.name
+            else:
+                #If the first serve is not legal
+                if random.random() <= self.server.second_legal:
+
+                    if random.random() <= self.server.second_win:
+                        self.record = 3
+                        self.winner = self.server.name
+                    
+                    #If the server doesn't win the second serve
+                    else:
+                        self.record = 4
+                        self.winner = otherplayer.name
+                else:
+                    self.record = 5
+                    self.winner = otherplayer.name
+    
+    def __repr__(self):
+        if self.record == 0:
+            return "The round is currenly ongoing please use the play() function"
+        elif self.record == 1:
+            return f"The round was won by {self.winner} on the first serve"
+        elif self.record == 2:
+            return f"The round was won by {self.winner} after {self.server.name} lost after a legal first serve"
+        elif self.record == 3:
+            return f"The round was won by {self.winner} on the second serve"
+        elif self.record == 4:
+            return f"The round was won by {self.winner} after {self.server.name} lost after a legal second serve"
+        elif self.record == 5:
+            return f"The round was won by {self.winner} after {self.server.name} failed to make a legal serve"
+
+
+class Game(Tennis):
     """
-    Given two players this simulates a game of tennis and returns the winner.
+    This class represents a singular game of tennis including:
+        > The Names of the players involved
+        > A record of what happened during the game
+        > The winner of the game
     """
-    playerZero["points_won_per_game"].append(0)
-    playerOne["points_won_per_game"].append(0)
-    while game_ongoing(playerZero["points_won_per_game"][-1], playerOne["points_won_per_game"][-1]):
-        if point_winner(playerZero, playerOne, server) == playerZero:
-            playerZero["points_won_per_game"][-1] += 1
+    
+    def __init__(self, players, server, tracked = True):
+        super().__init__(players, tracked)
+        self.server = server
+    
+    def play(self):
+        if self.winner == "Undecided":
+            rounds = self.record
+            ongoing = True
+            pointsList = []
+
+            while ongoing:
+                rounds.append(RoundOfTennis(self.players, self.server, False)) # Adding a round to the game
+                rounds[-1].play() #Playing the round 
+                pointsList.append(rounds[-1].winner) #Adds the name of the winner to pointsList
+
+                playerZeroPoints = pointsList.count(self.players[0].name)
+                playerOnePoints = pointsList.count(self.players[1].name)
+
+                if playerZeroPoints >= 4 or playerOnePoints >= 4: #Do the players have more than for points?
+                    if abs(playerZeroPoints - playerOnePoints) >= 2: #Is there difference greater than 2?
+                        ongoing = False
+                        if playerZeroPoints > playerOnePoints:
+                            self.winner = self.players[0].name
+                        else:
+                            self.winner = self.players[1].name
+                        
+
+
+    def __repr__(self):
+        if self.winner == "Undecided":
+            return "The game has not run yet! please run it using the play() functions"
         else:
-            playerOne["points_won_per_game"][-1] += 1
-    if playerZero["points_won_per_game"][-1] > playerOne["points_won_per_game"][-1]:
-        game_winner = playerZero
-        playerZero["games_won_per_set"][-1] += 1
-    else:
-        game_winner = playerOne
-        playerOne["games_won_per_set"][-1] += 1
-    return game_winner
+            numberOfPoints =  sum([1 for x in self.record if x.winner == self.winner])
+            return f"The game's winner is {self.winner} who scored {numberOfPoints} points"   
 
-def set_ongoing(p0GamesWon, p1GamesWon):
-    """
-    This function takes the parameters required to check if a set of tennis is ongoing and then returns true or false
-    """
-    if p0GamesWon > 6 or p1GamesWon >6:
-        if abs(p0GamesWon - p1GamesWon) >= 2:
-            return False
-    return True
     
-def play_set(playerZero, playerOne, starting_server = choose_server()):
-    """
-    Given 2 players, this function simulates a set of tennis and returns the winner of the set.
-    """
-    if playerOne["games_won_per_set"][-1] != 0 and playerZero["games_won_per_set"][-1] != 0:
-        playerZero["games_won_per_set"].append(0)
-        playerOne["games_won_per_set"].append(0)
-    while set_ongoing(playerZero["games_won_per_set"][-1], playerOne["games_won_per_set"][-1]):
-        play_game(playerZero, playerOne, starting_server)
-        starting_server = (starting_server + 1) % 2
-    if playerZero["games_won_per_set"][-1] > playerOne["games_won_per_set"][-1]:
-        set_winner = playerZero
-        playerZero["sets_won"][-1] += 1
-    else:
-        set_winner = playerOne
-        playerOne["sets_won"][-1] += 1
-    return set_winner
 
-def play_match(playerZero, playerOne, starting_server = choose_server()):
+class TennisSet(Tennis):
     """
-    Given 2 players, this function simulates a match of tennis and returns the winner of the match.
+    This class represents a set of tennis including:
+        > The Names of the players involved
+        > A record of the games during the set
+        > The winner of the set
     """
-    playerZero["sets_won"][-1] = 0 
-    playerOne["sets_won"][-1] = 0
-    while playerZero["sets_won"][-1] < 3 and playerOne["sets_won"][-1] < 3:
-        play_set(playerZero, playerOne, starting_server)
-    if playerZero["sets_won"][-1] > playerOne["sets_won"][-1]:
-        match_winner = playerZero
-        match_loser = playerOne
-    else:
-        match_winner = playerOne
-        match_loser = playerZero
-    print(f"{match_winner['name']} won the match, winning {sum(match_winner['points_won_per_game'])} points total.")
-    for i in range(len(match_winner['games_won_per_set'])):
-        print(f"The match winner won {match_winner['games_won_per_set'][i]} games in set {i + 1}")
-    print(f"The match winner's percentage of points won on their first serve is {match_winner['points_won_on_first_serve'] / match_winner['first_serves']}")
-    print(f"The match winner's percentage of points won on their second serve is {match_winner['points_won_on_second_serve'] / match_winner['second_serves']}")
-    return match_winner, match_loser
+    def __init__(self, players, tracked = True):
+        super().__init__(players, tracked)
+        self.server = choose_server(players[0], players[1])
+
+
+    def play(self):
+        if self.winner == "Undecided":
+            games = self.record
+            ongoing = True
+            gameWinnerList = []
+
+            while ongoing:
+                games.append(Game(self.players, self.server, False)) # Adding a game to the game
+                
+                #This is just alternating the servers between games               
+                if self.players[0] == self.server:
+                    self.server = self.players[1]
+                else:
+                    self.server = self.players[0]
+
+                games[-1].play() #Playing the game 
+                gameWinnerList.append(games[-1].winner) #Adds the name of the winner to gameList
+
+                playerZeroGamesWon = gameWinnerList.count(self.players[0].name) #Getting the number of times player 0 has won
+                playerOneGamesWon = gameWinnerList.count(self.players[1].name) # Getting the number of times player 1 has won
+
+                if playerZeroGamesWon >= 6 or playerOneGamesWon >= 6: #Do the players have more than for points?
+                    if abs(playerZeroGamesWon - playerOneGamesWon) >= 2: #Is there difference greater than 2?
+                        ongoing = False
+                        if playerZeroGamesWon > playerOneGamesWon:
+                            self.winner = self.players[0].name
+                        else:
+                            self.winner = self.players[1].name
+                        
+
+
+    def __repr__(self):
+        if self.winner == "Undecided":
+            return "The set has not run yet! please run it using the play() functions"
+        else:
+            numberOfGamesWonByWinner =  sum([1 for x in self.record if x.winner == self.winner])
+            nubmerOfGamesWonByLoser = sum([1 for x in self.record if x.winner != self.winner])
+            return f"The set's winner is {self.winner} who won {numberOfGamesWonByWinner} games where as the opponent only won {nubmerOfGamesWonByLoser} games"
+
+class TennisMatch(Tennis):
+    def __init__(self, players, tracked = True):
+        super().__init__(players, tracked)
+        
+    def play(self):
+        if self.winner == "Undecided":
+            ongoing = True
+            sets = self.record
+            setWinnerList = []
+            while ongoing:
+                sets.append(TennisSet(self.players, False)) #Adds a set to the record
+                sets[-1].play() #plays the current set
+                setWinnerList.append(sets[-1].winner)
+
+                playerZeroSetsWon = setWinnerList.count(self.players[0].name)
+                playerOneSetsWon = setWinnerList.count(self.players[1].name)
+
+                if playerZeroSetsWon >= 3:
+                    self.winner = self.players[0].name
+                    ongoing = False
+
+                if playerOneSetsWon >= 3:
+                    self.winner = self.players[1].name
+                    ongoing = False
+
+    def __repr__(self):
+        if self.winner == "Undecided":
+            return "The match hasn't started yet! please use play() to start the match"
+        else:
+            return f"The winner of the match is {self.winner}"
+
+
+
+DefaultPlayer1 = Player("Jim" ,0.76, 0.74, 0.94, 0.41)
+DefaultPlayer2 = Player("Bob", 0.7, 0.71, 0.92, 0.6)
+
+def choose_server(playerZero, playerOne):
+    """
+    Returns random player.
+    """
+    return random.choice([playerZero, playerOne])
 
 def read_players(file):
     """
@@ -169,7 +296,7 @@ def read_players(file):
     with open(file, "r") as f:
         for line in f:
             stats = line.split(" ")
-            players.append(makePlayer(stats[0], float(stats[1]), float(stats[2]), float(stats[3]), float(stats[4])))
+            players.append(Player(stats[0], float(stats[1]), float(stats[2]), float(stats[3]), float(stats[4])))
     
     return players
 
@@ -183,42 +310,51 @@ def create_players(num):
             stats = [random.random() for x in range(4)]
             f.write(f"{name} {stats[0]} {stats[1]} {stats[2]} {stats[3]}\n")
 
-class tourney():
+class Tourney():
     """
     This class manages a tourney of tennis players of single elimination style
     """
     def __init__(self, players):
+        """
+        Initilization for the tourney
+        """
         while ((len(players) & (len(players)-1) == 0) and len(players) != 0) != True: #using bit manipulations to check if we have a power of 2 for the number of players
             del players[-1] #delete the last players in the list until the number of players is a power of 2
+        
         self.players = players
+
         self.players_remaining = players
+
         self.players_eliminated = []
+
+
     def create_pairings(self):
         self.players_remaining = random.shuffle(self.players_remaining)
-    def play_round(self):
-        nextRound = []
-        for x in range(0, len(self.players_remaining) - 2, 2):
-            resultsOfGame = play_match(self.players_remaining[x], self.players_remaining[x + 1])
-            winner = resultsOfGame[0]
-            loser = resultsOfGame[1]
-            nextRound.append(winner)
-            self.players_eliminated.append(loser)
-        self.players_remaining = nextRound
-        print(self.players_remaining)
-    def play(self):
-        while len(self.players) != 1:
-            self.play_round()
 
-#print(point_winner(DefaultPlayer0, DefaultPlayer1))
-#print(play_game(DefaultPlayer0, DefaultPlayer1))
-#print(play_set(DefaultPlayer0, DefaultPlayer1))
-#print(play_match(DefaultPlayer0, DefaultPlayer1)[0])
+
+    def play_bracket(self):
+        nextBracket = []
+        for i in range(0, len(self.players_remaining) - 1, 2):
+            ongoingMatch = TennisMatch([self.players_remaining[i], self.players_remaining[i + 1]])
+            ongoingMatch.play()
+            #The following if else chooses the correct winner object to parse into the next braket
+            if ongoingMatch.winner == ongoingMatch.players[0]: 
+                winnerObject = ongoingMatch.players[0]
+                loserObject = ongoingMatch.players[1]
+            else:
+                winnerObject = ongoingMatch.players[1]
+                loserObject = ongoingMatch.players[0]
+            nextBracket.append(winnerObject)
+            self.players_eliminated.append(loserObject)
+        self.players_remaining = nextBracket
+
+
+
+
 #create_players(18)
-test = tourney(read_players("players.txt"))
-print(test.play_round())
-print(test.play_round())
-print(test.play_round())
-print(test.play_round())
+test = read_players("players.txt")
 
-print(test.players_remaining)
-            
+bigTest = Tourney(test)
+print(len(bigTest.players_remaining))
+bigTest.play_bracket()
+print(len(bigTest.players_remaining))
