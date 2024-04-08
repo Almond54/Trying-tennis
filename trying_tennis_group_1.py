@@ -3,14 +3,12 @@ import randomname
 
 
 class Tennis():
-
     """
     This class represents a basic object of tennis (either a round, game, set, match, or tourney) as each of these subtypes of scoring has:
         > Players
         > A record of what has happened at that scope
         > A winner
     """
-
     def __init__(self, players, tracked = True):
         self.players = players
         self.record = []
@@ -85,9 +83,12 @@ class Player():
                             FirstServeNum += 1
                         else:
                             SecondServeNum += 1
-        return ((FirstServeNum/roundsWon) * 100, (SecondServeNum/roundsWon) * 100, ((roundsWon - (FirstServeNum + SecondServeNum))/roundsWon) * 100)
+        return ((FirstServeNum/roundsWon) * 100, #percentage of rounds won on their first serve
+                (SecondServeNum/roundsWon) * 100, #percentage of rounds won on their second serve
+                ((roundsWon - (FirstServeNum + SecondServeNum))/roundsWon) * 100 #percentage of rounds won in the opponent's serve (?)
+                )
 
-    
+
 class RoundOfTennis(Tennis):
     """
     This class represents a singular round of tennis including:
@@ -157,7 +158,6 @@ class Game(Tennis):
         > A record of what happened during the game
         > The winner of the game
     """
-    
     def __init__(self, players, server, tracked = True):
         super().__init__(players, tracked)
         self.server = server
@@ -169,15 +169,15 @@ class Game(Tennis):
             pointsList = []
 
             while ongoing:
-                rounds.append(RoundOfTennis(self.players, self.server, False)) # Adding a round to the game
+                rounds.append(RoundOfTennis(self.players, self.server, False)) #Adding a round to the game
                 rounds[-1].play() #Playing the round 
                 pointsList.append(rounds[-1].winner) #Adds the name of the winner to pointsList
 
                 playerZeroPoints = pointsList.count(self.players[0].name)
                 playerOnePoints = pointsList.count(self.players[1].name)
 
-                if playerZeroPoints >= 4 or playerOnePoints >= 4: #Do the players have more than for points?
-                    if abs(playerZeroPoints - playerOnePoints) >= 2: #Is there difference greater than 2?
+                if playerZeroPoints >= 4 or playerOnePoints >= 4: #Do the players have more than 4 points?
+                    if abs(playerZeroPoints - playerOnePoints) >= 2: #Is their difference greater than 1?
                         ongoing = False
                         if playerZeroPoints > playerOnePoints:
                             self.winner = self.players[0].name
@@ -228,8 +228,8 @@ class TennisSet(Tennis):
                 playerZeroGamesWon = gameWinnerList.count(self.players[0].name) #Getting the number of times player 0 has won
                 playerOneGamesWon = gameWinnerList.count(self.players[1].name) # Getting the number of times player 1 has won
 
-                if playerZeroGamesWon >= 6 or playerOneGamesWon >= 6: #Do the players have more than for points?
-                    if abs(playerZeroGamesWon - playerOneGamesWon) >= 2: #Is there difference greater than 2?
+                if playerZeroGamesWon >= 6 or playerOneGamesWon >= 6: #Do the players have more than 6 games won?
+                    if abs(playerZeroGamesWon - playerOneGamesWon) >= 2: #Is their difference greater than 2?
                         ongoing = False
                         if playerZeroGamesWon > playerOneGamesWon:
                             self.winner = self.players[0].name
@@ -244,9 +244,15 @@ class TennisSet(Tennis):
         else:
             numberOfGamesWonByWinner =  sum([1 for x in self.record if x.winner == self.winner])
             nubmerOfGamesWonByLoser = sum([1 for x in self.record if x.winner != self.winner])
-            return f"The set's winner is {self.winner} who won {numberOfGamesWonByWinner} games where as the opponent only won {nubmerOfGamesWonByLoser} games"
+            return f"The set's winner is {self.winner} who won {numberOfGamesWonByWinner} games whereas the opponent only won {nubmerOfGamesWonByLoser} games"
 
 class TennisMatch(Tennis):
+    """
+    This class represents a tennis match including:
+        > The winner
+        > A scorboard of every set
+        > And the names of the players involved
+    """
     def __init__(self, players, tracked = True):
         super().__init__(players, tracked)
         
@@ -284,7 +290,7 @@ DefaultPlayer2 = Player("Bob", 0.7, 0.71, 0.92, 0.6)
 
 def choose_server(playerZero, playerOne):
     """
-    Returns random player.
+    Returns random player object.
     """
     return random.choice([playerZero, playerOne])
 
@@ -348,13 +354,52 @@ class Tourney():
             self.players_eliminated.append(loserObject)
         self.players_remaining = nextBracket
 
+def play_full_tournament(number_of_players):
+    """
+    This function plays a full tournament of tennis with a number of players which is a power of 2, and returns the winner.
+    """
+    create_players(number_of_players)
+    reading = read_players("players.txt")
+    Tournament = tourney(reading)
+    rounds_in_tourney = 0
+    while len(Tournament.players_remaining) != 1:
+        Tournament.play_bracket()
+        rounds_in_tourney += 1
+    winner = Tournament.players_remaining[0]
+    starting_number = 0
+    while winner.name != winner.name:
+        starting_number += 1
+    print(f"{winner.name} has won the tournament")
+    print(winner.first_legal)
+    print(winner.first_win)
+    print(winner.second_legal)
+    print(winner.second_win)
+    for i in range(1, rounds_in_tourney + 1):
+        print(winner.rounds_won_in_match(i))
+    #    print(Tournament.players_remaining[].rounds_won_in_match(i))
+    #    print(Tournament.players_remaining[].service_games_won(i))
+    #    print(Tournament.players_remaining[].percentageOfPoints(i))
+    return "hallo"
 
 
+#create_players(55)
+#test = read_players("players.txt")
 
-#create_players(18)
-test = read_players("players.txt")
+#bigTest = tourney(test)
+#print(len(bigTest.players_remaining))
+#bigTest.play_bracket()
+#bigTest.play_bracket()
+#bigTest.play_bracket()
+#bigTest.play_bracket()
+#print(len(bigTest.players_remaining))
+#print(bigTest.players_remaining[0].name)
+#print(bigTest.players_remaining[0].first_legal)
+#print(bigTest.players_remaining[0].first_win)
+#print(bigTest.players_remaining[0].second_legal)
+#print(bigTest.players_remaining[0].second_win)
+#for i in range(1, 5):
+#    print(bigTest.players_remaining[0].rounds_won_in_match(i))
+#    print(bigTest.players_remaining[0].service_games_won(i))
+#    print(bigTest.players_remaining[0].percentageOfPoints(i))
 
-bigTest = Tourney(test)
-print(len(bigTest.players_remaining))
-bigTest.play_bracket()
-print(len(bigTest.players_remaining))
+print(play_full_tournament(18))
