@@ -1,6 +1,6 @@
 import random
 import randomname
-
+import matplotlib.pyplot as plt
 
 class Tennis():
     """
@@ -367,5 +367,29 @@ class Tourney():
         self.winner = self.players_remaining[0]
     
 
+def experiment1():
+    """
+    This expermient attempts to investigate the how the chance on winning a match changes with the probability of the first serve being legal
+    """
+    control_player = Player("control player", 0.6, 0.6, 0.6 ,0.6) # a control player that is static for the number of matches
+    percent_of_matches_won = [] # This array matches up with the list of probabilites array
 
+    list_of_probabilities = []
+    for x in range(2, 98, 2):
+        list_of_probabilities.append(x/100)
+    
+    for x in list_of_probabilities:
+        temp_player = Player(f"{x} chance of legal first serve player", x, 0.6, 0.6, 0.6)
+        num_of_matches_won = 0
+        for i in range(1000):
+            temp_match = TennisMatch([temp_player, control_player])
+            temp_match.play()
+            if temp_match.winner == temp_player.name: # This is just checking if the test player won the match
+                num_of_matches_won += 1
+        percent_of_matches_won.append(num_of_matches_won/1000)
+    plt.plot(list_of_probabilities,percent_of_matches_won)
+    plt.xlabel("Percentage of first serve being legal")
+    plt.ylabel("Observed percentage of matches won")
+    plt.show()
 
+experiment1()
