@@ -87,7 +87,8 @@ class Player():
                 (SecondServeNum/roundsWon) * 100, #percentage of rounds won on their second serve
                 ((roundsWon - (FirstServeNum + SecondServeNum))/roundsWon) * 100 #percentage of rounds won in the opponent's serve (?)
                 )
-
+    def __repr__(self):
+        return f"This player is {self.name}. \nTheir probabilites are as follows:\nFirst serve: {self.first_legal} chance to be legal and a {self.first_win} chance to win. \nSecond serve: {self.second_legal} chance to be legal and a {self.second_win} chance to win"
 
 class RoundOfTennis(Tennis):
     """
@@ -308,12 +309,12 @@ def read_players(file):
 
 def create_players(num):
     """
-    This function writes players to a text file called players.txt
+    This function writes players to a text file called players.txt. The player statistics are randomly generated in a inverval between 0.6 and 1
     """
     with open("players.txt", "w") as f:
         for x in range(num):
             name = randomname.get_name()
-            stats = [random.random() for x in range(4)]
+            stats = [random.uniform(0.6, 1) for x in range(4)]
             f.write(f"{name} {stats[0]} {stats[1]} {stats[2]} {stats[3]}\n")
 
 class Tourney():
@@ -332,6 +333,8 @@ class Tourney():
         self.players_remaining = players
 
         self.players_eliminated = []
+
+        self.winner = "Undecided"
 
 
     def create_pairings(self):
@@ -353,53 +356,16 @@ class Tourney():
             nextBracket.append(winnerObject)
             self.players_eliminated.append(loserObject)
         self.players_remaining = nextBracket
-
-def play_full_tournament(number_of_players):
-    """
-    This function plays a full tournament of tennis with a number of players which is a power of 2, and returns the winner.
-    """
-    create_players(number_of_players)
-    reading = read_players("players.txt")
-    Tournament = tourney(reading)
-    rounds_in_tourney = 0
-    while len(Tournament.players_remaining) != 1:
-        Tournament.play_bracket()
-        rounds_in_tourney += 1
-    winner = Tournament.players_remaining[0]
-    starting_number = 0
-    while winner.name != winner.name:
-        starting_number += 1
-    print(f"{winner.name} has won the tournament")
-    print(winner.first_legal)
-    print(winner.first_win)
-    print(winner.second_legal)
-    print(winner.second_win)
-    for i in range(1, rounds_in_tourney + 1):
-        print(winner.rounds_won_in_match(i))
-    #    print(Tournament.players_remaining[].rounds_won_in_match(i))
-    #    print(Tournament.players_remaining[].service_games_won(i))
-    #    print(Tournament.players_remaining[].percentageOfPoints(i))
-    return "hallo"
+    
+    def player_full_tournament(self):
+        """
+        This method plays a full tournament of tennis updating the object attributes accordingly
+        """
+        while len(self.players_remaining) != 1:
+            self.play_bracket()
+        
+        self.winner = self.players_remaining[0]
+    
 
 
-#create_players(55)
-#test = read_players("players.txt")
 
-#bigTest = tourney(test)
-#print(len(bigTest.players_remaining))
-#bigTest.play_bracket()
-#bigTest.play_bracket()
-#bigTest.play_bracket()
-#bigTest.play_bracket()
-#print(len(bigTest.players_remaining))
-#print(bigTest.players_remaining[0].name)
-#print(bigTest.players_remaining[0].first_legal)
-#print(bigTest.players_remaining[0].first_win)
-#print(bigTest.players_remaining[0].second_legal)
-#print(bigTest.players_remaining[0].second_win)
-#for i in range(1, 5):
-#    print(bigTest.players_remaining[0].rounds_won_in_match(i))
-#    print(bigTest.players_remaining[0].service_games_won(i))
-#    print(bigTest.players_remaining[0].percentageOfPoints(i))
-
-print(play_full_tournament(18))
