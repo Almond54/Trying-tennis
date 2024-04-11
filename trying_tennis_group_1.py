@@ -373,7 +373,8 @@ def experiment1():
     """
     control_player = Player("control player", 0.6, 0.6, 0.6 ,0.6) # a control player that is static for the number of matches
     percent_of_matches_won = [] # This array matches up with the list of probabilites array
-
+    numberofcompletions = 10000
+    completionestimate = 0
     list_of_probabilities = []
     for x in range(2, 98, 2):
         list_of_probabilities.append(x/100)
@@ -381,12 +382,14 @@ def experiment1():
     for x in list_of_probabilities:
         temp_player = Player(f"{x} chance of legal first serve player", x, 0.6, 0.6, 0.6)
         num_of_matches_won = 0
-        for i in range(1000):
+        for i in range(numberofcompletions):
             temp_match = TennisMatch([temp_player, control_player])
+            completionestimate += (1/(96/2)) / numberofcompletions * 100
+            print("we are ", completionestimate," percent complete")
             temp_match.play()
             if temp_match.winner == temp_player.name: # This is just checking if the test player won the match
                 num_of_matches_won += 1
-        percent_of_matches_won.append(num_of_matches_won/1000)
+        percent_of_matches_won.append(num_of_matches_won/numberofcompletions)
     plt.plot(list_of_probabilities,percent_of_matches_won)
     plt.xlabel("Percentage of first serve being legal")
     plt.ylabel("Observed percentage of matches won")
