@@ -390,6 +390,8 @@ def experiment1():
         num_of_matches_won = 0
         for i in range(numberofcompletions):
             temp_match = TennisMatch([temp_player, control_player])
+            completionestimate += (1/(96/2)) / numberofcompletions * 100
+            print("we are ", completionestimate," percent complete")
             temp_match.play()
             completionestimate += (1/(96/2)) / numberofcompletions * 100
             print("we are ", completionestimate," percent complete")
@@ -400,6 +402,7 @@ def experiment1():
     plt.xlabel("Percentage of first serve being legal")
     plt.ylabel("Observed percentage of matches won")
     plt.show()
+
 
 def experiment2(sampleSize):
     """
@@ -428,3 +431,4 @@ def experiment2(sampleSize):
 
 
 print(experiment2(10000))
+
