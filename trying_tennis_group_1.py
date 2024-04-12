@@ -137,6 +137,8 @@ class RoundOfTennis(Tennis):
                     self.record = 5
                     self.winner = otherplayer.name
     
+
+
     def __repr__(self):
         if self.record == 0:
             return "The round is currenly ongoing please use the play() function"
@@ -342,6 +344,9 @@ class Tourney():
 
 
     def play_bracket(self):
+        """
+        This method simulates one bracket of a multi elminination tourney
+        """
         nextBracket = []
         for i in range(0, len(self.players_remaining) - 1, 2):
             ongoingMatch = TennisMatch([self.players_remaining[i], self.players_remaining[i + 1]])
@@ -392,4 +397,10 @@ def experiment1():
     plt.ylabel("Observed percentage of matches won")
     plt.show()
 
-experiment1()
+def experiment2():
+    """
+    This experiment is used to give us a sample for the probabilty that Carlos Alcaraz wins against Novak Djokovic
+    """
+
+    Carlos = Player("Carlos Alcaraz", 0.7, 0.71, 0.92, 0.62) # Creating player objects for each player
+    Novak = Player("Novak Djokovic", 0.76, 0.74, 0.94, 0.41)
