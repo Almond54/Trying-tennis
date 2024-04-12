@@ -378,6 +378,8 @@ def experiment1():
     """
     control_player = Player("control player", 0.6, 0.6, 0.6 ,0.6) # a control player that is static for the number of matches
     percent_of_matches_won = [] # This array matches up with the list of probabilites array
+    numberofcompletions = 10000
+    completionestimate = 0
 
     list_of_probabilities = []
     for x in range(2, 98, 2):
@@ -386,21 +388,34 @@ def experiment1():
     for x in list_of_probabilities:
         temp_player = Player(f"{x} chance of legal first serve player", x, 0.6, 0.6, 0.6)
         num_of_matches_won = 0
-        for i in range(1000):
+        for i in range(numberofcompletions):
             temp_match = TennisMatch([temp_player, control_player])
             temp_match.play()
+            completionestimate += (1/(96/2)) / numberofcompletions * 100
+            print("we are ", completionestimate," percent complete")
             if temp_match.winner == temp_player.name: # This is just checking if the test player won the match
                 num_of_matches_won += 1
-        percent_of_matches_won.append(num_of_matches_won/1000)
+        percent_of_matches_won.append(num_of_matches_won/numberofcompletions)
     plt.plot(list_of_probabilities,percent_of_matches_won)
     plt.xlabel("Percentage of first serve being legal")
     plt.ylabel("Observed percentage of matches won")
     plt.show()
 
-def experiment2():
+def experiment2(sampleSize):
     """
     This experiment is used to give us a sample for the probabilty that Carlos Alcaraz wins against Novak Djokovic
     """
 
     Carlos = Player("Carlos Alcaraz", 0.7, 0.71, 0.92, 0.62) # Creating player objects for each player
     Novak = Player("Novak Djokovic", 0.76, 0.74, 0.94, 0.41)
+    CarlosMatchWins = 0
+    for i in range(sampleSize):
+        tempMatch = TennisMatch([Carlos, Novak]) # Creating the tennis match and playing it
+        tempMatch.play()
+        if tempMatch.winner == Carlos.name:
+            CarlosMatchWins += 1
+    return CarlosMatchWins/sampleSize # returns the sample mean 
+
+
+
+print(experiment2(100000))
