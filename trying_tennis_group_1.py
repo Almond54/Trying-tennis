@@ -137,6 +137,8 @@ class RoundOfTennis(Tennis):
                     self.record = 5
                     self.winner = otherplayer.name
     
+
+
     def __repr__(self):
         if self.record == 0:
             return "The round is currenly ongoing please use the play() function"
@@ -342,6 +344,9 @@ class Tourney():
 
 
     def play_bracket(self):
+        """
+        This method simulates one bracket of a multi elminination tourney
+        """
         nextBracket = []
         for i in range(0, len(self.players_remaining) - 1, 2):
             ongoingMatch = TennisMatch([self.players_remaining[i], self.players_remaining[i + 1]])
@@ -375,6 +380,7 @@ def experiment1():
     percent_of_matches_won = [] # This array matches up with the list of probabilites array
     numberofcompletions = 10000
     completionestimate = 0
+
     list_of_probabilities = []
     for x in range(2, 98, 2):
         list_of_probabilities.append(x/100)
@@ -387,6 +393,8 @@ def experiment1():
             completionestimate += (1/(96/2)) / numberofcompletions * 100
             print("we are ", completionestimate," percent complete")
             temp_match.play()
+            completionestimate += (1/(96/2)) / numberofcompletions * 100
+            print("we are ", completionestimate," percent complete")
             if temp_match.winner == temp_player.name: # This is just checking if the test player won the match
                 num_of_matches_won += 1
         percent_of_matches_won.append(num_of_matches_won/numberofcompletions)
@@ -395,4 +403,32 @@ def experiment1():
     plt.ylabel("Observed percentage of matches won")
     plt.show()
 
-experiment1()
+
+def experiment2(sampleSize):
+    """
+    This experiment is used to give us a sample for the probabilty that Carlos Alcaraz wins against Novak Djokovic
+    """
+
+    Carlos = Player("Carlos Alcaraz", 0.7, 0.71, 0.92, 0.62) # Creating player objects for each player
+    Novak = Player("Novak Djokovic", 0.76, 0.74, 0.94, 0.41)
+    CarlosMatchWins = 0
+    data = [] # used to get the sample variance
+    for i in range(sampleSize):
+        tempMatch = TennisMatch([Carlos, Novak]) # Creating the tennis match and playing it
+        tempMatch.play()
+        if tempMatch.winner == Carlos.name:
+            CarlosMatchWins += 1
+            data.append = [1]
+        else:
+            data.append = [0]
+    sampleMean = CarlosMatchWins/sampleSize # the sample mean 
+    sampleVariance = 0
+    for i in data:
+        sampleVariance += (i - sampleMean)**2
+    sampleVariance = 1/(sampleSize - 1)*sampleVariance # scale the sample variance
+    return f"The sample mean is {sampleMean} and the sample variance is {sampleVariance}"
+
+
+
+print(experiment2(10000))
+
