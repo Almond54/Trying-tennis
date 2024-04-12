@@ -409,13 +409,22 @@ def experiment2(sampleSize):
     Carlos = Player("Carlos Alcaraz", 0.7, 0.71, 0.92, 0.62) # Creating player objects for each player
     Novak = Player("Novak Djokovic", 0.76, 0.74, 0.94, 0.41)
     CarlosMatchWins = 0
+    data = [] # used to get the sample variance
     for i in range(sampleSize):
         tempMatch = TennisMatch([Carlos, Novak]) # Creating the tennis match and playing it
         tempMatch.play()
         if tempMatch.winner == Carlos.name:
             CarlosMatchWins += 1
-    return CarlosMatchWins/sampleSize # returns the sample mean 
+            data.append = [1]
+        else:
+            data.append = [0]
+    sampleMean = CarlosMatchWins/sampleSize # the sample mean 
+    sampleVariance = 0
+    for i in data:
+        sampleVariance += (i - sampleMean)**2
+    sampleVariance = 1/(sampleSize - 1)*sampleVariance # scale the sample variance
+    return f"The sample mean is {sampleMean} and the sample variance is {sampleVariance}"
 
 
 
-print(experiment2(100000))
+print(experiment2(10000))
