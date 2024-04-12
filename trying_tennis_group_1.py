@@ -415,9 +415,9 @@ def experiment2(sampleSize):
         tempMatch.play()
         if tempMatch.winner == Carlos.name:
             CarlosMatchWins += 1
-            data.append = [1]
+            data.append(1)
         else:
-            data.append = [0]
+            data.append(0)
     sampleMean = CarlosMatchWins/sampleSize # the sample mean 
     sampleVariance = 0
     for i in data:
