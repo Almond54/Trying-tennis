@@ -136,6 +136,39 @@ class RoundOfTennis(Tennis):
                 else:
                     self.record = 5
                     self.winner = otherplayer.name
+
+    def play2(self):
+        if self.winner == "Undecided":
+            games = self.record
+            ongoing = True
+            gameWinnerList = []
+
+
+            while ongoing:
+                games.append(Game(self.players, self.server, False)) # Adding a game to the game
+                
+                #This is just alternating the servers between games               
+                if self.players[0] == self.server:
+                    self.server = self.players[1]
+                else:
+                    self.server = self.players[0]
+
+
+                games[-1].play2() #Playing the game 
+                gameWinnerList.append(games[-1].winner) #Adds the name of the winner to gameList
+
+
+                playerZeroGamesWon = gameWinnerList.count(self.players[0].name) #Getting the number of times player 0 has won
+                playerOneGamesWon = gameWinnerList.count(self.players[1].name) # Getting the number of times player 1 has won
+
+
+                if playerZeroGamesWon >= 6 or playerOneGamesWon >= 6: #Do the players have more than 6 games won?
+                    if abs(playerZeroGamesWon - playerOneGamesWon) >= 2: #Is their difference greater than 2?
+                        ongoing = False
+                        if playerZeroGamesWon > playerOneGamesWon:
+                            self.winner = self.players[0].name
+                        else:
+                            self.winner = self.players[1].name
     
 
 
@@ -187,6 +220,31 @@ class Game(Tennis):
                         else:
                             self.winner = self.players[1].name
                         
+    
+    def play2(self):
+        """
+        A second play function using the alternate play function for rounds
+        """
+        if self.winner == "Undecided":
+            rounds = self.record
+            ongoing = True
+            pointsList = []
+
+            while ongoing:
+                rounds.append(RoundOfTennis(self.players, self.server, False)) #Adding a round to the game
+                rounds[-1].play2() #Playing the round 
+                pointsList.append(rounds[-1].winner) #Adds the name of the winner to pointsList
+
+                playerZeroPoints = pointsList.count(self.players[0].name)
+                playerOnePoints = pointsList.count(self.players[1].name)
+
+                if playerZeroPoints >= 4 or playerOnePoints >= 4: #Do the players have more than 4 points?
+                    if abs(playerZeroPoints - playerOnePoints) >= 2: #Is their difference greater than 1?
+                        ongoing = False
+                        if playerZeroPoints > playerOnePoints:
+                            self.winner = self.players[0].name
+                        else:
+                            self.winner = self.players[1].name
 
 
     def __repr__(self):
@@ -239,7 +297,37 @@ class TennisSet(Tennis):
                         else:
                             self.winner = self.players[1].name
                         
+    def play2(self):
+        """
+        Alternate play function using the alternate round play function
+        """
+        if self.winner == "Undecided":
+            games = self.record
+            ongoing = True
+            gameWinnerList = []
 
+            while ongoing:
+                games.append(Game(self.players, self.server, False)) # Adding a game to the game
+                
+                #This is just alternating the servers between games               
+                if self.players[0] == self.server:
+                    self.server = self.players[1]
+                else:
+                    self.server = self.players[0]
+
+                games[-1].play2() #Playing the game 
+                gameWinnerList.append(games[-1].winner) #Adds the name of the winner to gameList
+
+                playerZeroGamesWon = gameWinnerList.count(self.players[0].name) #Getting the number of times player 0 has won
+                playerOneGamesWon = gameWinnerList.count(self.players[1].name) # Getting the number of times player 1 has won
+
+                if playerZeroGamesWon >= 6 or playerOneGamesWon >= 6: #Do the players have more than 6 games won?
+                    if abs(playerZeroGamesWon - playerOneGamesWon) >= 2: #Is their difference greater than 2?
+                        ongoing = False
+                        if playerZeroGamesWon > playerOneGamesWon:
+                            self.winner = self.players[0].name
+                        else:
+                            self.winner = self.players[1].name
 
     def __repr__(self):
         if self.winner == "Undecided":
@@ -280,16 +368,36 @@ class TennisMatch(Tennis):
                     self.winner = self.players[1].name
                     ongoing = False
 
+    def play2(self):
+        """
+        Alternate print function using the alternate round play function.
+        """
+        if self.winner == "Undecided":
+            ongoing = True
+            sets = self.record
+            setWinnerList = []
+            while ongoing:
+                sets.append(TennisSet(self.players, False)) #Adds a set to the record
+                sets[-1].play2() #plays the current set
+                setWinnerList.append(sets[-1].winner)
+
+                playerZeroSetsWon = setWinnerList.count(self.players[0].name)
+                playerOneSetsWon = setWinnerList.count(self.players[1].name)
+
+                if playerZeroSetsWon >= 3:
+                    self.winner = self.players[0].name
+                    ongoing = False
+
+                if playerOneSetsWon >= 3:
+                    self.winner = self.players[1].name
+                    ongoing = False
+
     def __repr__(self):
         if self.winner == "Undecided":
             return "The match hasn't started yet! please use play() to start the match"
         else:
             return f"The winner of the match is {self.winner}"
 
-
-
-DefaultPlayer1 = Player("Jim" ,0.76, 0.74, 0.94, 0.41)
-DefaultPlayer2 = Player("Bob", 0.7, 0.71, 0.92, 0.6)
 
 def choose_server(playerZero, playerOne):
     """
@@ -299,7 +407,7 @@ def choose_server(playerZero, playerOne):
 
 def read_players(file):
     """
-    This function will extract the player dictionaries from a text file returning a list of all the player dictionaries
+    This function will extract the player objects from a text file returning a list of all the player dictionaries
     """
     players = []
     with open(file, "r") as f:
@@ -404,6 +512,37 @@ def experiment1():
     plt.show()
 
 
+def experiment1_b():
+    """
+    This expermient attempts to investigate the how the chance on winning a match changes with the probability of the first serve being legal
+    """
+    control_player = Player("control player", 0.6, 0.6, 0.6 ,0.6) # a control player that is static for the number of matches
+    percent_of_matches_won_2 = [] # This array matches up with the list of probabilites array
+    numberofcompletions = 500
+    list_of_probabilities_2 = []
+    for x in range(2, 98, 2):
+        list_of_probabilities_2.append(x/100)
+    completionestimate = 0
+
+
+    for x in list_of_probabilities_2:
+        temp_player = Player(f"{x} chance of legal first serve player", x, 0.6, 0.6, 0.6)
+        num_of_matches_won = 0
+        for i in range(numberofcompletions):
+            temp_match = TennisMatch([temp_player, control_player])
+            completionestimate += (1/(96/2)) / numberofcompletions * 100
+            print("we are ", completionestimate," percent complete")
+            temp_match.play2()
+            if temp_match.winner == temp_player.name: # This is just checking if the test player won the match
+                num_of_matches_won += 1
+        percent_of_matches_won_2.append(num_of_matches_won/numberofcompletions)
+    plt.plot(list_of_probabilities_2,percent_of_matches_won_2)
+    plt.xlabel("Percentage of first serve being legal")
+    plt.ylabel("Observed percentage of matches won")
+    plt.title("using alternative code")
+    plt.show()
+
+
 def experiment2(sampleSize):
     """
     This experiment is used to give us a sample for the probabilty that Carlos Alcaraz wins against Novak Djokovic
@@ -430,5 +569,5 @@ def experiment2(sampleSize):
 
 
 
-print(experiment2(10000))
+
 
